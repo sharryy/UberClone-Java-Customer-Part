@@ -1,0 +1,2 @@
+rootProject.name='UberEDMT'
+include ':app'
