@@ -23,6 +23,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.rengwuxian.materialedittext.MaterialEditText;
 
+import dmax.dialog.SpotsDialog;
+
 public class MainActivity extends AppCompatActivity {
     Button btnSignIn, btnRegister;
     RelativeLayout rootLayout;
@@ -75,7 +77,10 @@ public class MainActivity extends AppCompatActivity {
         dialog.setPositiveButton("SIGN IN", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+
                 dialog.dismiss();
+
+                btnSignIn.setEnabled(false);
 
                 if (TextUtils.isEmpty(edtEmail.getText().toString().trim())) {
                     Snackbar.make(rootLayout, "Please Enter Email Address", Snackbar.LENGTH_SHORT).show();
@@ -90,23 +95,28 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
 
+                final android.app.AlertDialog waitingDialog = new SpotsDialog.Builder().setContext(MainActivity.this).build();
+                waitingDialog.show();
+
                 auth.signInWithEmailAndPassword(edtEmail.getText().toString().trim(), edtPassword.getText().toString().trim())
                         .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
                             @Override
                             public void onSuccess(AuthResult authResult) {
+                                waitingDialog.dismiss();
                                 startActivity(new Intent(MainActivity.this, Welcome.class));
                                 finish();
                             }
                         }).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
+                        waitingDialog.dismiss();
                         Snackbar.make(rootLayout, "Failed: " + e.getMessage(), Snackbar.LENGTH_SHORT).show();
+                        btnSignIn.setEnabled(true);
                     }
                 });
             }
 
         });
-
         dialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
