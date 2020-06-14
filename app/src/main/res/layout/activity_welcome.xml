@@ -4,40 +4,55 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/map"
     android:name="com.google.android.gms.maps.SupportMapFragment"
-    tools:context = "com.anonymous.uberedmt.Welcome"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    tools:context="com.anonymous.uberedmt.Welcome"
     tools:layout="@layout/activity_welcome">
 
-        <LinearLayout
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingTop="16dp"
-            android:paddingBottom="16dp"
-            android:weightSum="10">
+            android:layout_alignParentBottom="true"
+            app:cardElevation="10dp">
 
-            <androidx.appcompat.widget.SwitchCompat
-
-                android:id="@+id/location_switch"
-                android:layout_width="0dp"
-                android:layoutDirection="rtl"
-                android:padding="4dp"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="3"
-                app:ball_press_color="@android:color/white"
-                app:ball_release_color="@color/ballReleaseColor"
-                app:base_press_color="@color/basePressColor"
-                app:base_release_color="@color/baseReleaseColor"
-                app:icon_press="@drawable/ic_location_off"
-                app:icon_release="@drawable/ic_location_on" />
-            
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/visibility_status"
-                android:textStyle="bold"/>
+                android:layout_margin="16dp"
+                android:orientation="horizontal"
+                android:weightSum="10">
 
-        </LinearLayout>
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/location_switch"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="3"
+                    android:layoutDirection="rtl"
+                    android:padding="4dp"
+                    app:ball_press_color="@android:color/white"
+                    app:ball_release_color="@color/ballReleaseColor"
+                    app:base_press_color="@color/basePressColor"
+                    app:base_release_color="@color/baseReleaseColor"
+                    android:textOff="@drawable/ic_location_off"
+                    android:textOn="@drawable/ic_location_on" />
+
+                <Button
+                    android:id="@+id/btn_find_user"
+                    android:layout_width="0dp"
+                    android:text="@string/find_user"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="7" />
+
+
+            </LinearLayout>
+
+
+        </androidx.cardview.widget.CardView>
+
+    </RelativeLayout>
 
 </fragment>
