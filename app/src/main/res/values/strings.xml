@@ -11,4 +11,7 @@
     <string name="phone">Phone</string>
     <string name="title_activity_welcome">Map</string>
     <string name="find_user">FIND USER</string>
+    <string name="enter_pickup_location">Enter PickUp Location</string>
+    <string name="go">GO</string>
+    <string name="google_direction_api">AIzaSyD-zGdGwq3kmBlgXipYTuUUNoEBuXYC6DQ</string>
 </resources>

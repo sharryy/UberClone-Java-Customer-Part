@@ -1,58 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
-<fragment xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/map"
-    android:name="com.google.android.gms.maps.SupportMapFragment"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.anonymous.uberedmt.Welcome"
-    tools:layout="@layout/activity_welcome">
+    android:layout_height="match_parent">
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <androidx.cardview.widget.CardView
+        android:layout_height="wrap_content"
+        android:id="@+id/layout_panel"
+        android:orientation="horizontal">
+        
+        <EditText
+            android:id="@+id/edtPlace"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            app:cardElevation="10dp">
+            android:layout_weight="5"
+            android:layout_margin="10dp"
+            android:hint="@string/enter_pickup_location"/>
 
-            <LinearLayout
-                android:layout_width="match_parent"
+<!--        <fragment-->
+<!--            android:id="@+id/places_autocomplete_fragment"-->
+<!--            android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_margin="10dp"-->
+<!--            android:layout_weight="5"/>-->
+
+        <Button
+            android:id="@+id/btnGo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginTop="10dp"
+            android:text="@string/go"/>
+
+        
+    </LinearLayout>
+
+    <fragment
+        android:id="@+id/map"
+        android:layout_below="@+id/layout_panel"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context="com.anonymous.uberedmt.Welcome"
+        tools:layout="@layout/activity_welcome" />
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        app:cardElevation="10dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:orientation="horizontal"
+            android:weightSum="10">
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/location_switch"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:orientation="horizontal"
-                android:weightSum="10">
+                android:layout_weight="3"
+                android:layoutDirection="rtl"
+                android:padding="4dp"
+                android:textOff="@drawable/ic_location_off"
+                android:textOn="@drawable/ic_location_on" />
 
-                <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/location_switch"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="3"
-                    android:layoutDirection="rtl"
-                    android:padding="4dp"
-                    app:ball_press_color="@android:color/white"
-                    app:ball_release_color="@color/ballReleaseColor"
-                    app:base_press_color="@color/basePressColor"
-                    app:base_release_color="@color/baseReleaseColor"
-                    android:textOff="@drawable/ic_location_off"
-                    android:textOn="@drawable/ic_location_on" />
-
-                <Button
-                    android:id="@+id/btn_find_user"
-                    android:layout_width="0dp"
-                    android:text="@string/find_user"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="7" />
+            <Button
+                android:id="@+id/btn_find_user"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="7"
+                android:text="@string/find_user" />
 
 
-            </LinearLayout>
+        </LinearLayout>
 
 
-        </androidx.cardview.widget.CardView>
+    </androidx.cardview.widget.CardView>
 
-    </RelativeLayout>
+</RelativeLayout>
 
-</fragment>
