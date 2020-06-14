@@ -404,7 +404,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
     private void getDirection() {
         currentPosition = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
 
-        String requestApi = null;
+        String requestApi;
 
         try {
             requestApi = "https://maps.googleapis.com/maps/api/directions/json?" +
@@ -499,7 +499,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
     }
 
     private List decodePoly(String encoded) {
-        List<Double> poly = new ArrayList<>();
+        List<LatLng> poly = new ArrayList<LatLng>();
         int index = 0, len = encoded.length();
         int lat = 0, lng = 0;
 
@@ -516,13 +516,16 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
             shift = 0;
             result = 0;
             do {
-                b = encoded.charAt(index++) - 63;
+                b = encoded.charAt(index++) - 63;  // ERROR: INDEX OUT OF BOUND
                 result |= (b & 0x1f) << shift;
                 shift += 5;
             } while (b >= 0x20);
             int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
             lng += dlng;
-            poly.add((int) ((double) lat / 1E5), (double) lng / 1E5);
+
+            LatLng p = new LatLng((((double) lat / 1E5)),
+                    (((double) lng / 1E5)));
+            poly.add(p);
         }
 
         return poly;
