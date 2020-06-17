@@ -27,7 +27,7 @@ import androidx.core.content.PermissionChecker;
 import androidx.fragment.app.FragmentActivity;
 
 import com.anonymous.uberedmt.Common.Common;
-import com.anonymous.uberedmt.Retro.IGoogleAPI;
+import com.anonymous.uberedmt.Remote.IGoogleAPI;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.google.android.gms.common.ConnectionResult;
@@ -93,7 +93,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
     private Location currentLocation;
 
     private static final int UPDATE_INTERVAL = 5000;
-    private static final int FASTEST_INTERVAL = 5000;
+    private static final int FASTEST_INTERVAL = 3000;
     private static final int DISPLACEMENT = 10;
 
     private DatabaseReference drivers;
@@ -189,7 +189,6 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PLACES_REQUEST_CODE && resultCode == RESULT_OK) {
             Place place = Autocomplete.getPlaceFromIntent(data);
 
@@ -220,14 +219,13 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
         }
 
         polyLineList = new ArrayList<>();
-//        btnGo = (Button) findViewById(R.id.btnGo);
-//        edtPlace =(EditText) findViewById(R.id.edtPlace);
 
         //Places Autocomplete
 
         places = findViewById(R.id.edtPlace);
         Places.initialize(getApplicationContext(), "AIzaSyD-zGdGwq3kmBlgXipYTuUUNoEBuXYC6DQ");
         places.setFocusable(false);
+
         places.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -237,28 +235,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
                 startActivityForResult(intent, PLACES_REQUEST_CODE);
             }
         });
-        ;
 
-//        places = (PlaceAutocompleteFragment) getFragmentManager().findFragmentById(R.id.places_autocomplete_fragment);
-//        places.setOnPlaceSelectedListener(new PlaceSelectionListener() {
-//            @Override
-//            public void onPlaceSelected(Place place) {
-//                if (location_switch.isChecked()) {
-//                    destination = place.getAddress().toString();
-//                    destination = destination.replace(" ", "+");
-//
-//                    getDirection();
-//                }
-//                else{
-//                    Toast.makeText(Welcome.this, "Please change your status to online!", Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//
-//            @Override
-//            public void onError(Status status) {
-//                Toast.makeText(Welcome.this, "Error: " + status.getStatusMessage(), Toast.LENGTH_SHORT).show();
-//            }
-//        });
         btnGo = findViewById(R.id.btnGo);
         btnGo.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -284,7 +261,8 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
                     Snackbar.make(mapFragment.getView(), "You are Online", Snackbar.LENGTH_SHORT).show();
                 } else {
                     stopLocationUpdates();
-                    mCurrent.remove();
+                    if(mCurrent != null)
+                        mCurrent.remove();
                     mMap.clear();
                     handler = new Handler();
                     handler.removeCallbacks(drawPathRunnable);
@@ -293,7 +271,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
             }
         });
 
-        drivers = FirebaseDatabase.getInstance().getReference("Drivers");
+        drivers = FirebaseDatabase.getInstance().getReference(Common.driver_tbl);
         geoFire = new GeoFire(drivers);
 
         setUpLocation();
@@ -335,7 +313,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
     private void createLocationRequest() {
         locationRequest = new LocationRequest();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        locationRequest.setFastestInterval(UPDATE_INTERVAL);
+        locationRequest.setFastestInterval(FASTEST_INTERVAL);
         locationRequest.setInterval(UPDATE_INTERVAL);
         locationRequest.setSmallestDisplacement(DISPLACEMENT);
     }
