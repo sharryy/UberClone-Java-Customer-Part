@@ -384,6 +384,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
 
         String requestApi;
 
+
         try {
             requestApi = "https://maps.googleapis.com/maps/api/directions/json?" +
                     "mode=driving&" +

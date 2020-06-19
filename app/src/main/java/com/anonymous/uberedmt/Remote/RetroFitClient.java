@@ -1,4 +1,4 @@
-package com.anonymous.uberedmt.Retro;
+package com.anonymous.uberedmt.Remote;
 
 import retrofit2.Retrofit;
 import retrofit2.converter.scalars.ScalarsConverterFactory;

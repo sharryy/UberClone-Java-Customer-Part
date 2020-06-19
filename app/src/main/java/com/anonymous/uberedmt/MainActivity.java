@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.anonymous.uberedmt.Common.Common;
 import com.anonymous.uberedmt.Model.User;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -40,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
 
         auth = FirebaseAuth.getInstance();
         db = FirebaseDatabase.getInstance();
-        users = db.getReference("Users");
+        users = db.getReference(Common.user_driver_tbl);
 
         btnRegister = (Button) findViewById(R.id.btnRegister);
         btnSignIn = (Button) findViewById(R.id.btn_sign_in);
