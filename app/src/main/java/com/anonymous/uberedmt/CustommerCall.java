@@ -1,5 +1,6 @@
 package com.anonymous.uberedmt;
 
+import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -38,6 +39,8 @@ public class CustommerCall extends AppCompatActivity {
 
     String customerID;
 
+    double lat, lng;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,6 +62,18 @@ public class CustommerCall extends AppCompatActivity {
             }
         });
 
+        btnAccept.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                 Intent intent = new Intent(CustommerCall.this, DriverTracking.class);
+                 intent.putExtra("lat", lat);
+                 intent.putExtra("lng", lng);
+
+                 startActivity(intent);
+                 finish();
+            }
+        });
+
         mService = Common.getGoogleAPI();
         mFCMService = Common.getFCMService();
 
@@ -68,8 +83,8 @@ public class CustommerCall extends AppCompatActivity {
         mediaPlayer.start();
 
         if (getIntent() != null) {
-            double lat = getIntent().getDoubleExtra("lat", -1.0);
-            double lng = getIntent().getDoubleExtra("lng", -1.0);
+            lat = getIntent().getDoubleExtra("lat", -1.0);
+            lng = getIntent().getDoubleExtra("lng", -1.0);
             customerID = getIntent().getStringExtra("customer");
 
             getDirection(lat, lng);

@@ -96,6 +96,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
 
     private FusedLocationProviderClient fusedLocationProviderClient;
     private LocationRequest locationRequest;
+    private LocationCallback locationCallback;
 
     private static final int UPDATE_INTERVAL = 5000;
     private static final int FASTEST_INTERVAL = 3000;
@@ -107,7 +108,6 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
     private Marker mCurrent;
     private SwitchCompat location_switch;
     private SupportMapFragment mapFragment;
-    private LocationCallback locationCallback;
 
     //Car Animations
     private List<LatLng> polyLineList;

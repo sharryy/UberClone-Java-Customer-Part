@@ -61,4 +61,3 @@ dependencies {
     implementation 'de.hdodenhof:circleimageview:3.1.0'
     implementation 'com.shamanland:xdroid-toaster:0.3.0'
 }
-
