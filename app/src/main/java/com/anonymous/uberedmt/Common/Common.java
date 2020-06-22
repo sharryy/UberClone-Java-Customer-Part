@@ -2,6 +2,7 @@ package com.anonymous.uberedmt.Common;
 
 import android.location.Location;
 
+import com.anonymous.uberedmt.Model.User;
 import com.anonymous.uberedmt.Remote.FCMClient;
 import com.anonymous.uberedmt.Remote.IFCMService;
 import com.anonymous.uberedmt.Remote.IGoogleAPI;
@@ -16,6 +17,8 @@ public class Common {
     public static final String token_tbl = "Tokens";
 
     public static Location mLastLocation = null;
+
+    public static User currentUser;
 
     public static final String baseURL = "https://maps.googleapis.com";
     public static final String fcmURL = "https://fcm.googleapis.com/";
