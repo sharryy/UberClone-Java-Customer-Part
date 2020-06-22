@@ -11,11 +11,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -27,6 +29,7 @@ import androidx.core.content.PermissionChecker;
 import androidx.fragment.app.FragmentActivity;
 
 import com.anonymous.uberedmt.Common.Common;
+import com.anonymous.uberedmt.Model.Token;
 import com.anonymous.uberedmt.Remote.IGoogleAPI;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
@@ -63,9 +66,12 @@ import com.google.android.libraries.places.widget.AutocompleteActivity;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.nabinbhandari.android.permissions.PermissionHandler;
 import com.nabinbhandari.android.permissions.Permissions;
 
@@ -90,7 +96,6 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
 
     private FusedLocationProviderClient fusedLocationProviderClient;
     private LocationRequest locationRequest;
-    private Location currentLocation;
 
     private static final int UPDATE_INTERVAL = 5000;
     private static final int FASTEST_INTERVAL = 3000;
@@ -119,6 +124,9 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
     private Polyline blackPolyLine, greyPolyLine;
 
     private IGoogleAPI mService;
+
+    //Presense System
+    DatabaseReference onlineRef, currentUserRef;
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -204,7 +212,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        try {
+
             super.onCreate(savedInstanceState);
             setContentView(R.layout.activity_welcome);
             callPermissions();
@@ -214,15 +222,28 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
             // Obtain the SupportMapFragment and get notified when the map is ready to be used.
             mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
             mapFragment.getMapAsync(this);
-        } catch (Exception e) {
-            Log.d("Error: ", "Zalalat");
-        }
+
+            onlineRef = FirebaseDatabase.getInstance().getReference().child(".info/connected");
+            currentUserRef = FirebaseDatabase.getInstance().getReference(Common.driver_tbl)
+                    .child(FirebaseAuth.getInstance().getCurrentUser().getUid());
+
+            onlineRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    //Removing Value from Table when driver is disconnected
+                    currentUserRef.onDisconnect().removeValue();
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
 
         polyLineList = new ArrayList<>();
 
         //Places Autocomplete
-
-        places = findViewById(R.id.edtPlace);
+        places = findViewById( R.id.edt_Place);
         Places.initialize(getApplicationContext(), "AIzaSyD-zGdGwq3kmBlgXipYTuUUNoEBuXYC6DQ");
         places.setFocusable(false);
 
@@ -236,7 +257,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
             }
         });
 
-        btnGo = findViewById(R.id.btnGo);
+        btnGo = findViewById(R.id.btn_Go);
         btnGo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -245,8 +266,6 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
                 Log.d("ShARRY", destination);
 
                 getDirection();
-
-                mService = Common.getGoogleAPI();
             }
         });
 
@@ -256,10 +275,16 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
             @Override
             public void onClick(View v) {
                 if (location_switch.isChecked()) {
+
+                    FirebaseDatabase.getInstance().goOnline(); //Set Connected when switch on
+
                     startLocationUpdates();
                     displayLocation();
                     Snackbar.make(mapFragment.getView(), "You are Online", Snackbar.LENGTH_SHORT).show();
                 } else {
+
+                    FirebaseDatabase.getInstance().goOffline(); //Set Disconnect when switch off
+
                     stopLocationUpdates();
                     if(mCurrent != null)
                         mCurrent.remove();
@@ -275,6 +300,19 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
         geoFire = new GeoFire(drivers);
 
         setUpLocation();
+
+        mService = Common.getGoogleAPI();
+
+        updateFirebaseToken();
+    }
+
+    private void updateFirebaseToken() {
+        FirebaseDatabase db = FirebaseDatabase.getInstance();
+        DatabaseReference tokens = db.getReference(Common.token_tbl);
+
+        Token token = new Token(FirebaseInstanceId.getInstance().getToken());
+        tokens.child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                    .setValue(token);
     }
 
     @Override
@@ -349,10 +387,10 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
             @Override
             public void onSuccess(Location location) {
                 if (location != null) {
-                    currentLocation = location;
+                    Common.mLastLocation = location;
                     if (location_switch.isChecked()) {
-                        final double latitude = currentLocation.getLatitude();
-                        final double longitude = currentLocation.getLongitude();
+                        final double latitude = Common.mLastLocation.getLatitude();
+                        final double longitude = Common.mLastLocation.getLongitude();
 
                         //Update To FireBase
                         geoFire.setLocation(FirebaseAuth.getInstance().getCurrentUser().getUid(), new GeoLocation(latitude, longitude), new GeoFire.CompletionListener() {
@@ -380,7 +418,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
     }
 
     private void getDirection() {
-        currentPosition = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+        currentPosition = new LatLng(Common.mLastLocation.getLatitude(), Common.mLastLocation.getLongitude());
 
         String requestApi;
 
