@@ -5,6 +5,7 @@ import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
@@ -51,6 +52,7 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.JointType;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
@@ -130,6 +132,19 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
+
+        try {
+            boolean isSuccess = googleMap.setMapStyle(
+                    MapStyleOptions.loadRawResourceStyle(this, R.raw.uber_style_map)
+            );
+
+            if (!isSuccess)
+                Log.d("Error: ", "Map Style Load Failed");
+        } catch (Resources.NotFoundException e) {
+            Log.d("TAG", e.getMessage());
+        }
+
+
         mMap = googleMap;
         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         mMap.setTrafficEnabled(false);
@@ -247,26 +262,20 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
         Places.initialize(getApplicationContext(), "AIzaSyD-zGdGwq3kmBlgXipYTuUUNoEBuXYC6DQ");
         places.setFocusable(false);
 
-        places.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //Initialize Place-Field List
-                List<Place.Field> fieldList = Arrays.asList(Place.Field.ADDRESS, Place.Field.LAT_LNG, Place.Field.NAME);
-                Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.OVERLAY, fieldList).build(Welcome.this);
-                startActivityForResult(intent, PLACES_REQUEST_CODE);
-            }
+        places.setOnClickListener(v -> {
+            //Initialize Place-Field List
+            List<Place.Field> fieldList = Arrays.asList(Place.Field.ADDRESS, Place.Field.LAT_LNG, Place.Field.NAME);
+            Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.OVERLAY, fieldList).setCountry("PK").build(Welcome.this);
+            startActivityForResult(intent, PLACES_REQUEST_CODE);
         });
 
         btnGo = findViewById(R.id.btn_Go);
-        btnGo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                destination = places.getText().toString();
-                destination = destination.replace(" ", "+"); //Replace space with plus to fetch data
-                Log.d("ShARRY", destination);
+        btnGo.setOnClickListener(v -> {
+            destination = places.getText().toString();
+            destination = destination.replace(" ", "+"); //Replace space with plus to fetch data
+            Log.d("ShARRY", destination);
 
-                getDirection();
-            }
+            getDirection();
         });
 
 
@@ -389,6 +398,9 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
                 if (location != null) {
                     Common.mLastLocation = location;
                     if (location_switch.isChecked()) {
+
+
+
                         final double latitude = Common.mLastLocation.getLatitude();
                         final double longitude = Common.mLastLocation.getLongitude();
 
@@ -397,7 +409,9 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback {
                             @Override
                             public void onComplete(String key, DatabaseError error) {
                                 mCurrent = mMap.addMarker(new MarkerOptions()
-                                        .position(new LatLng(latitude, longitude)).title("Your Location"));
+                                        .position(new LatLng(latitude, longitude))
+                                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker))
+                                        .title("Your Location"));
 
                                 //Moving Camera
                                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(latitude, longitude), 15.0f));
