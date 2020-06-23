@@ -40,12 +40,12 @@
     </LinearLayout>
 
     <TextView
-        android:id="@+id/txt_rider_app"
+        android:id="@+id/txt_forgot_password"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAlignment="center"
         android:textSize="12sp"
-        android:text="@string/looking_for_a_rider_app"
+        android:text="FORGOT PASSWORD? JUST TAP HERE !"
         android:layout_marginTop="20dp"
         android:layout_marginBottom="20dp"
         android:layout_centerHorizontal="true"
@@ -58,7 +58,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:weightSum="2"
-        android:layout_above="@id/txt_rider_app"
+        android:layout_above="@id/txt_forgot_password"
         android:layout_margin="16dp">
         
         <Button
