@@ -2,6 +2,7 @@ package com.anonymous.uberedmt;
 
 import android.Manifest;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -9,6 +10,8 @@ import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -53,6 +56,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -90,6 +94,9 @@ public class DriverTracking extends FragmentActivity implements OnMapReadyCallba
     IFCMService mFCMService;
 
     GeoFire geoFire;
+    Button btnStartTrip;
+
+    Location pickupLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,6 +121,91 @@ public class DriverTracking extends FragmentActivity implements OnMapReadyCallba
         mFCMService = Common.getFCMService();
 
         setUpLocation();
+
+        btnStartTrip = findViewById(R.id.btnStartTrip);
+        btnStartTrip.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(btnStartTrip.getText().equals("START TRIP")){
+                    pickupLocation = Common.mLastLocation;
+                    btnStartTrip.setText("DROP OFF HERE");
+                }
+                else if(btnStartTrip.getText().equals("DROP OFF HERE")){
+                    calculateCashFee(pickupLocation, Common.mLastLocation);
+                }
+            }
+        });
+    }
+
+    private void calculateCashFee(Location pickupLocation, Location mLastLocation) {
+
+
+        String requestApi;
+
+
+        try {
+            requestApi = "https://maps.googleapis.com/maps/api/directions/json?" +
+                    "mode=driving&" +
+                    "transit_routing_preference=less_driving&" +
+                    "origin=" + pickupLocation.getLatitude() + "," + pickupLocation.getLongitude() + "&" +
+                    "destination=" + mLastLocation.getLatitude() + "," + mLastLocation.getLongitude() + "&" +
+                    "key=" + getResources().getString(R.string.google_direction_api);
+
+            mService.getPath(requestApi).enqueue(new Callback<String>() {
+                @Override
+                public void onResponse(Call<String> call, Response<String> response) {
+                    try {
+
+                        //Extracting JSON
+                        JSONObject jsonObject = new JSONObject(response.body().toString());
+                        JSONArray routes = jsonObject.getJSONArray("routes");
+
+                        JSONObject object = routes.getJSONObject(0);
+
+                        JSONArray legs = object.getJSONArray("legs");
+
+                        JSONObject legsObject = legs.getJSONObject(0);
+
+                        //Get Distance
+                        JSONObject distance = legsObject.getJSONObject("distance");
+                        String distance_text = distance.getString("text");
+
+                        //Only taking numbers from String to parse
+                        Double distance_value = Double.parseDouble(distance_text.replaceAll("[^0-9\\\\.]+", ""));
+
+                        //Get Distance
+                        JSONObject timeObject = legsObject.getJSONObject("duration");
+                        String time_text = timeObject.getString("text");
+
+                        //Only taking numbers from String to parse
+                        Double time_value = Double.parseDouble(time_text.replaceAll("[^0-9\\\\.]+", ""));
+
+                        //Creating new activity to show details
+                        Intent intent = new Intent(DriverTracking.this, TripDetail.class);
+                        intent.putExtra("start_address", legsObject.getString("start_address"));
+                        intent.putExtra("end_address", legsObject.getString("end_address"));
+                        intent.putExtra("time", String.valueOf(time_value));
+                        intent.putExtra("distance", String.valueOf(distance_value));
+                        intent.putExtra("total", Common.formulaPrice(distance_value, time_value));
+                        intent.putExtra("location_start", String.format("%f,%f", pickupLocation.getLatitude(), pickupLocation.getLongitude()));
+                        intent.putExtra("location_end",String.format("%f,%f", Common.mLastLocation.getLatitude(), Common.mLastLocation.getLongitude()));
+
+                        startActivity(intent);
+                        finish();
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<String> call, Throwable t) {
+                    Toast.makeText(DriverTracking.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -147,6 +239,7 @@ public class DriverTracking extends FragmentActivity implements OnMapReadyCallba
                 //We will need customerId to send Notification
                 //So, we will pass it from previous activity
                 sendArrivedNotification(customerId);
+                btnStartTrip.setEnabled(true);
             }
 
             @Override
